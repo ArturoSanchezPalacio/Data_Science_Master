@@ -1,0 +1,16 @@
+"0","```r
+sapply(training.data.raw,function(x) sum(is.na(x)))
+```"
+"1","PassengerId    Survived      Pclass        Name         Sex         Age       SibSp       Parch      Ticket 
+          0           0           0           0           0         177           0           0           0 
+       Fare       Cabin    Embarked 
+          0         687           2 
+"
+"0","```r
+sapply(training.data.raw, function(x) length(unique(x)))
+```"
+"1","PassengerId    Survived      Pclass        Name         Sex         Age       SibSp       Parch      Ticket 
+        891           2           3         891           2          89           7           7         681 
+       Fare       Cabin    Embarked 
+        248         148           4 
+"

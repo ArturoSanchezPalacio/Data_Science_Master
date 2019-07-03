@@ -1,0 +1,2 @@
+"0","data$SUPERF[is.na(data$SUPERF)] <- mean(data$SUPERF,na.rm = T)"
+"0","numeric <- data[,c(3, 8,9)]"

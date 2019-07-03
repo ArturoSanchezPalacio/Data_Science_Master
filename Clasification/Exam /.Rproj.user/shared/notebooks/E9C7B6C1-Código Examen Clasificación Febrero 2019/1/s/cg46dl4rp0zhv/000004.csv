@@ -1,0 +1,3 @@
+"0","library(pROC)"
+"0","resRoc <- roc(data.test$cat2 ~ as.numeric(fitted.results))"
+"0","plot(resRoc, legacy.axes = TRUE)"

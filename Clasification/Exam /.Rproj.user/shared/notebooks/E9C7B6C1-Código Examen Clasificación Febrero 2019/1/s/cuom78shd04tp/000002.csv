@@ -1,0 +1,5 @@
+"0","sum(diag(general_conditional_pred_table))/dim(data.test)[1]"
+"1","[1]"
+"1"," 0.8815166"
+"1","
+"

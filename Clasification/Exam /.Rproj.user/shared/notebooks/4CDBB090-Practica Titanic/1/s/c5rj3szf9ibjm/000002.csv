@@ -1,0 +1,16 @@
+"0","```r
+library(pscl)
+```"
+"1","Classes and Methods for R developed in the
+Political Science Computational Laboratory
+Department of Political Science
+Stanford University
+Simon Jackman
+hurdle and zeroinfl functions by Achim Zeileis
+"
+"0","```r
+pR2(model)
+```"
+"1","         llh      llhNull           G2     McFadden         r2ML         r2CU 
+-354.6950111 -532.6961008  356.0021794    0.3341513    0.3591775    0.4880244 
+"

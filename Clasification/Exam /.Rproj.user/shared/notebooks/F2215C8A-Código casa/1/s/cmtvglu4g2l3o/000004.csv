@@ -1,0 +1,6 @@
+"0","library(rms)"
+"0","auc(data.test$cat2, as.numeric(fitted.results))"
+"1","Area under the curve: "
+"1","0.9019"
+"1","
+"

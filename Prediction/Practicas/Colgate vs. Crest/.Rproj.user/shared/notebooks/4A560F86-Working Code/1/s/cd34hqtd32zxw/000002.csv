@@ -1,0 +1,1 @@
+"0","mydata <- ts(data[,c(3,4)], start = 1958, frequency = 52)"

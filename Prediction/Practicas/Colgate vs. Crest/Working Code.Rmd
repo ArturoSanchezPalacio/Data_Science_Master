@@ -1,0 +1,545 @@
+---
+title: "Colgate-Crest"
+output: html_notebook
+author: "Arturo Sánchez Palacio"
+---
+
+# Diclaimer
+
+  Though the following code is perfectly valid for the analysis of the Colgate and Crest's market shares between 1958 and 1963 this code is not merely a study over this period but also an introduction to the study of time series. Because of this, some parts of this code may look tedious or redundant for and advanced programmer or data analyst.
+
+# Loading and exploring the data.
+
+We start loading the data from the .xlsx file:
+
+```{r}
+library(openxlsx)
+data <- read.xlsx("data.xlsx", colNames = TRUE, detectDates = TRUE)
+head(data)
+tail(data)
+```
+
+Once we have loaded the data we chech for non-defined values
+
+```{r}
+sum(is.na(data))
+```
+
+The data is complete.
+
+To get a better idea of the data we build two time series one for Colgate and one for Crest:
+
+```{r}
+colgate <- ts(data$Colgate, start = 1958, frequency = 52)
+crest <- ts(data$Crest, start = 1958, frequency = 52)
+```
+
+We also create an object where we store both series:
+
+```{r}
+mydata <- ts(data[,c(3,4)], start = 1958, frequency = 52)
+```
+
+Once the time series are built we can plot the market shares along the time:
+
+```{r}
+library(fpp2)
+autoplot(colgate) +
+  ggtitle("Colgate Market Shares") +
+  xlab("Week") +
+  ylab("Market Share")
+autoplot(crest) +
+  ggtitle("Crest Market Shares") +
+  xlab("Week") +
+  ylab("Market Share")
+autoplot(mydata, facets = TRUE)
+autoplot(mydata, facets = FALSE) +
+  ggtitle("Cuotas de mercado de Crest y Colgate") +
+  xlab("Tiempo") +
+  ylab("Cuota de mercado")
+```
+
+Interpretation:
+
+The Colgate's plot shows a clear decreasing pattern, market share starts at 0.425 and falls to 0.172 in the end.
+The Crest's plot shows a clear increasing pattern, market share starts at 0.108 and finishes up to 0.384 reaching in the middle even higher values. 
+
+In both graphics we can see seasonabilty.
+
+
+```{r}
+ggseasonplot(colgate, month.labels = TRUE, month.labels.left = TRUE) +
+  ylab("Market Share") +
+  ggtitle("Seasonal plot: Colgate Market Share")
+
+ggseasonplot(crest, week.labels = TRUE, week.labels.left = TRUE) +
+  ylab("Market Share") +
+  ggtitle("Seasonal plot: Crest Market Share")
+```
+
+We can see a strong relationship between both market shares. The biggest descents in Colgate's shares (Weeks 29 to 32 in 1960 and 10 to 12 in 1961) coincide with Crest's biggest ascents.
+
+
+```{r}
+ggseasonplot(colgate, polar = TRUE) +
+  ylab("Market Share") +
+  ggtitle("Seasonal plot: Colgate Market Share")
+
+ggseasonplot(crest, polar = TRUE) +
+  ylab("Market Share") +
+  ggtitle("Seasonal plot: Crest Market Share")
+```
+
+```{r}
+ggsubseriesplot(colgate) +
+  ylab("$ million") +
+  ggtitle("Seasonal subseries plot: Colgate Market Share")
+
+ggsubseriesplot(crest) +
+  ylab("$ million") +
+  ggtitle("Seasonal subseries plot: Crest Market Share")
+```
+
+It is possible to compare the two time series in order to evaluate the relationship between them:
+
+```{r}
+qplot(crest, colgate) +
+  ylab("Colgate market share)") + xlab("Crest market share")
+```
+
+As we have seen before as Crest grows, Colgate decreases. Since they have the same target client this is quite a reasonable statement.
+
+```{r}
+gglagplot(crest)
+gglagplot(colgate)
+```
+
+The relationship is strongly positive at crest lags, reflecting the strong seasonality in the data. For Colgate lags the plot is not easy to read.
+
+```{r}
+ggAcf(colgate, lag.max = 260)
+ggAcf(crest, lag.max = 260)
+```
+
+When data have a trend, the autocorrelations for small lags tend to be large and positive because observations nearby in time are also nearby in size. So the ACF of trended time series tend to have positive values that slowly decrease as the lags increase.
+
+When data are seasonal, the autocorrelations will be larger for the seasonal lags (at multiples of the seasonal frequency) than for other lags.
+
+When data are both trended and seasonal, you see a combination of these effects. This is the case when working with Colgate and Crest.
+
+# First (easy) predictions
+
+Now we are going to split the observations in a training set and a test set. The training set will be composed by the observations in the years 1958-1962 (both included) and we will use as a test set the sixteen weeks from 1963.
+
+```{r}
+set.seed(12345)
+colgate_training <-  window(colgate, start = 1958,end = c(1962, 52))
+crest_training <- window(crest, start = 1958, c(1962, 52))
+colgate_test <- window(colgate, start = 1963)
+crest_test <- window(crest, start = 1963)
+training_data <- data[1:260,]
+```
+
+Once this is done we will start by setting some very obvious methods as a basis on which we can compare the models we will be building later. Sometimes one of these simple methods will be the best forecasting method available; but in many cases, these methods will serve as benchmarks rather than the method of choice. That is, any forecasting methods we develop will be compared to these simple methods to ensure that the new method is better than these simple alternatives. If not, the new method is not worth considering.
+
+```{r}
+autoplot(colgate_training) +
+  autolayer(meanf(colgate_training, h = 16),
+    series = "Mean", PI = FALSE) +
+  autolayer(naive(colgate_training, h = 16),
+    series = "Naïve", PI = FALSE) +
+  autolayer(snaive(colgate_training, h = 16),
+    series = "Seasonal naïve", PI = FALSE) +
+  autolayer(colgate_test) +
+  ggtitle("Forecasts for Colgate's market shares") +
+  xlab("Year") + ylab("Market Share") +
+  guides(colour = guide_legend(title = "Forecast"))
+
+autoplot(crest_training) +
+  autolayer(meanf(crest_training, h = 16),
+    series = "Mean", PI = FALSE) +
+  autolayer(naive(crest_training, h = 16),
+    series = "Naïve", PI = FALSE) +
+  autolayer(snaive(crest_training, h = 16),
+    series = "Seasonal naïve", PI = FALSE) +
+  autolayer(crest_test) +
+  ggtitle("Forecasts for Crest's market shares") +
+  xlab("Year") + ylab("Market Share") +
+  guides(colour = guide_legend(title = "Forecast"))
+```
+
+As we can see for both options the seasonal naïve seems like the best option and yet we it is not a great one. This justifies searching for more complex models. But first let's explore the residuals from one of these predictions, for example the naïve one:
+
+```{r}
+checkresiduals(naive(colgate_training))
+checkresiduals(naive(crest_training))
+```
+
+There are so many reasons why this forecast is not good. First, we can see from the ACF plot that lots of spikes cross the blue line in both forecasts. Second both forecasts as well have a large stadistic associated and a really tiny p-value. This makes us think that the distribution from the residuals is far from white noise.
+
+As a didachtical exercises we are also going to calculate the accuracy:
+
+```{r}
+accuracy(naive(colgate_training), colgate_test)
+accuracy(naive(crest_training), crest_test)
+accuracy(snaive(colgate_training), colgate_test)
+accuracy(snaive(crest_training), crest_test)
+```
+
+The best method would be the naïve approximation since it has the lowest MASE (and we are going to prior this indicator).
+
+
+Some times it is useful to have an interval in which we are surer that the prediction is contained. In the following plots we show the prediction and the intervalos of 80% and 95% which means that the probability of the estimate of being in this interval is 0.8 or 0.95:
+
+```{r}
+autoplot(naive(colgate_training))
+autoplot(naive(crest_training))
+autoplot(snaive(colgate_training))
+autoplot(snaive(crest_training))
+```
+
+When a normal distribution for the forecast errors is an unreasonable assumption, one alternative is to use bootstrapping, which only assumes that the forecast errors are uncorrelated.
+
+```{r}
+naive(colgate_training, bootstrap = TRUE)
+```
+
+  Next step is building an ARIMA model:
+  In order to do that we try to convert the time series in stationary series. First we differentiate:
+
+```{r}
+ggAcf(diff(colgate_training), lag.max = 260)
+ggAcf(diff(crest_training), lag.max = 260)
+Box.test(diff(colgate_training), type = "Ljung-Box")
+Box.test(diff(crest_training), type = "Ljung-Box")
+```
+
+  This appears not to be enough so we are going to differentiate over the differentiated series:
+  
+```{r}
+ggAcf(diff(diff(colgate_training)), lag.max = 260)
+ggAcf(diff(diff(crest_training)), lag.max = 260)
+Box.test(diff(diff(colgate_training)), type = "Ljung-Box")
+Box.test(diff(diff(crest_training)), type = "Ljung-Box")
+```
+  
+  This looks like a bad idea so we are going to try other techniques.
+
+
+```{r}
+autoplot(diff(colgate_training,52)) +
+    xlab("Year") + ylab("") +
+    ggtitle("Antidiabetic drug sales")
+ggAcf(diff(colgate_training,52), lag.max = 260)
+```
+
+  Let's try one last thing:
+  
+```{r}
+ggAcf(diff((diff(diff(crest_training,52),1)),1), lag.max = 260)
+```
+
+  One way of knowing if it is necessary to differentiate is to run a KPSS hypothesis test. In this test, the null hypothesis is that the data are stationary, and we look for evidence that the null hypothesis is false. Consequently, small p-values (e.g., less than 0.05) suggest that differencing is required.
+  
+```{r}
+library(urca)
+summary(ur.kpss(colgate_training))
+summary(ur.kpss(crest_training))
+```
+  
+  In both cases the stadistic is much bigger than the 1% critical value, indicating that the null hypothesis is rejected. That is, the data are not stationary. We can difference the data, and apply the test again.
+  
+```{r}
+summary(ur.kpss(diff(colgate_training)))
+summary(ur.kpss(diff(crest_training)))
+```
+  
+  This time, the test statistic is tiny, and well within the range we would expect for stationary data. So we can conclude that the differenced data are stationary.
+
+  Through the function ndiffs() we can estimate how many times it is necessary to differentiate:
+  
+```{r}
+ndiffs(colgate_training)
+ndiffs(crest_training)
+```
+  
+  The function nsdiffs() indicates how many times is necessary to seasonal differentiate a series. In this case we can see it is not necessary:
+
+```{r}
+nsdiffs(colgate_training)
+nsdiffs(crest_training)
+```
+
+# Fitting the ARIMA models
+
+
+  Next we are going to try to fit an ARIMA model for each series. Here we are supposing the data is seasonal:
+  
+```{r} 
+(fit_colgate <- auto.arima(colgate_training, seasonal = TRUE, stepwise = FALSE, approximation = FALSE))
+(fit_crest <- auto.arima(crest_training, seasonal = TRUE, stepwise = FALSE, approximation = FALSE))
+```
+  
+  The prediction intervals for ARIMA models are based on assumptions that the residuals are uncorrelated and normally distributed. If either of these assumptions does not hold, then the prediction intervals may be incorrect. For this reason, always plot the ACF and histogram of the residuals to check the assumptions before producing prediction intervals.
+  
+```{r}
+checkresiduals(fit_colgate)
+checkresiduals(fit_crest)
+```
+  
+  And now that the residuals are white noise we can compute the forecast for both series:
+  
+```{r}
+fit_colgate %>% forecast(h = 16) %>% autoplot(include = 80)
+fit_crest %>% forecast(h = 16) %>% autoplot(include = 80)
+```
+
+  Let's check its accuracy on the test set:
+  
+  (Note. Because the model was not re-estimated, the “residuals” obtained here are actually one-step forecast errors. Consequently, the results produced from the accuracy() command are actually on the test set (despite the output saying “Training set”).)
+```{r}
+colgate.test <- Arima(colgate_test, model = fit_colgate)
+accuracy(colgate.test)
+crest.test <- Arima(crest_test, model = fit_crest)
+accuracy(crest.test)
+```
+
+## Fitting outliers model
+
+  R provides (more precisely the tsoutliers package provides) functions to detect outliers. 
+  
+```{r}
+library(tsoutliers)
+(colgate_outlier <- tso(colgate_training, types = c("TC", "AO", "LS", "IO", "SLS")))
+plot(colgate_outlier)
+```
+  
+```{r}
+(crest_outlier <- tso(crest_training, types = c("TC", "AO", "LS", "IO", "SLS")))
+plot(crest_outlier)
+summary(crest_outlier)
+```
+  
+  These process has given us two great advantages. Firstly, we have detected all the outliers and plotted how the adjusted series would be. Secondly, we have built two new ARIMA models with remarkably better AICc coeffitients.
+  
+  Now we are going to create new forecasts for this models:
+  
+```{r}
+(fit_colgate_outlier <- auto.arima(colgate_outlier$yadj, seasonal = TRUE, stepwise = FALSE, approximation = FALSE))
+(fit_crest_outlier <- auto.arima(crest_outlier$yadj, seasonal = TRUE, stepwise = FALSE, approximation = FALSE))
+```
+  
+  We see again a quite good improval in the AICc coeffitient. This will be our definite model for prediction. We check its residuals and compute the forescasts:
+  
+```{r}
+checkresiduals(fit_colgate_outlier)
+checkresiduals(fit_crest_outlier)
+```
+  
+  
+```{r}
+fit_colgate_outlier %>% forecast(h = 16) %>% autoplot(include = 80)
+fit_crest_outlier %>% forecast(h = 16) %>% autoplot(include = 80)
+```
+  
+  Note that Arima() does not re-estimate in this case. Instead, the model obtained previously (and stored as cafe.train) is applied to the test data. Because the model was not re-estimated, the “residuals” obtained here are actually one-step forecast errors. Consequently, the results produced from the accuracy() command are actually on the test set (despite the output saying “Training set”).
+  
+```{r}
+colgate.test <- Arima(colgate_test, model = fit_colgate_outlier)
+accuracy(colgate.test)
+crest.test <- Arima(crest_test, model = fit_crest_outlier)
+accuracy(crest.test)
+```
+  
+  
+  This looks quite similar to the previous predictions but the big difference is that now we have a more firm idea this is true (the AICc has been reduced, the plots show white noise and the Ljung-Box test bears it out).
+  
+
+  
+# Causal Impact
+
+  **Note**. This part is not necessary for the assignment but gives us a better understanding of the data.
+
+  In this section we will work with the aggregated dataset, so called, mydata.
+  
+```{r}
+dim(mydata)
+matplot(mydata, type = "l" )
+```
+  
+  In the above graphic we see Colgate's market share in red and Crest's market share in black.
+  
+  Now to use the library Causal Impact we require a zoo object so we are going to create one:
+  
+```{r}
+library(zoo)
+period <- seq(as.Date('1958/01/08'), as.Date('1962/12/26'), by = 'week')
+data_zoo <- zoo(cbind(training_data$Crest, training_data$Colgate), period)
+crest_zoo <- zoo(training_data$Crest, period)
+colgate_zoo <- zoo(training_data$Colgate, period)
+```
+  
+  To estimate a causal effect, we begin by specifying which period in the data should be used for training the model (pre-intervention period) and which period for computing a counterfactual prediction (post-intervention period). We have checked before that the effects of the intervention start the 31st week of 1960 which corresponds to the 135th register:
+  
+```{r}
+pre.period <- as.Date(c("1958-01-08","1960-07-27"))
+post.period <- as.Date(c("1960-08-03","1962-12-26"))
+```
+  
+
+  Now we are ready to perform the causal analysis. We have two choices here: performing with the whole data or for each brand. We do both firstly cause technically is really easy. We'll talk about the interpretation later:
+  
+```{r}
+library(CausalImpact)
+impact_combined <- CausalImpact(data_zoo, pre.period, post.period)
+plot(impact_combined)
+```
+  
+```{r}
+impact_Colgate <- CausalImpact(colgate_zoo, pre.period, post.period)
+impact_Crest <- CausalImpact(crest_zoo, pre.period, post.period)
+plot(impact_Colgate)
+plot(impact_Crest)
+```
+
+```{r}
+print("Summary for the whole data")
+summary(impact_combined)
+print("Summary for Colgate")
+summary(impact_Colgate)
+print("Summary for Crest")
+summary(impact_Crest)
+```
+  
+  Which interpretation would be:
+  
+```{r}
+print("WHOLE DATA")
+summary(impact_combined, "report")
+print("")
+print("COLGATE")
+summary(impact_Colgate, "report")
+print("")
+print("CREST")
+summary(impact_Crest, "report")
+```
+
+
+
+
+
+  Let's recall where the outliers were:
+  
+
+  
+```{r}
+tso(colgate_training, types = c("TC", "AO", "LS", "IO", "SLS"))
+tso(crest_training, types = c("TC", "AO", "LS", "IO", "SLS"))
+```
+```{r}
+(outliers_colgate_idx <- colgate_outlier$outliers$ind)
+(outliers_crest_idx <- crest_outlier$outliers$ind)
+```
+  
+# Intervention Model
+
+  In this section we try to figure out how important was the impact of the intervention understanding as an intervention the ADA declaration and the marketing campaign:
+  
+```{r}
+arimax_model_crest <- arimax(crest_training,
+                       order = c(0,1,1), #orden del ARIMA
+                       xtransf = data.frame(I1 = (1*(seq(crest_training) == outliers_crest_idx))),  #matriz con 1 donde haya outliers y 0 en lo demás            
+                       transfer = list(c(0,0)), #porque p=0
+                       method = 'ML')
+
+summary(arimax_model_crest)
+```
+  
+  
+  
+```{r}
+arimax_model_colgate <- arimax(colgate_training,
+                       order = c(1,0,1), #orden del ARIMA
+                       xtransf = data.frame(I1 = (1*(seq(crest_training) == outliers_colgate_idx))),  #matriz con 1 donde haya outliers y 0 en lo demás            
+                       transfer = list(c(0,0)), #porque p=0
+                       method = 'ML')
+
+summary(arimax_model_crest)
+```
+
+
+
+
+  
+```{r}
+library(lmtest) 
+coeftest(arimax_model_crest)
+```
+
+  
+  
+  
+  For our scenario, the xtranf parameter provides a value equal to 1 at the outliers time index and zero at others. The transfer parameter is a list consisting of the ARMA orders for each transfer covariate. For our scenario, we specify an AR order equal to 0:
+     
+```{r}
+arimax_model_colgate <- arimax(colgate_training,
+                       order = c(0,1,1), #orden del ARIMA
+                       xtransf = data.frame(I1 = (1*(seq(colgate_training) == outliers_colgate_idx))),  #matriz con 1 donde haya outliers y 0 en lo demás            
+                       transfer = list(c(0,0,0)), #porque p=0
+                       method = 'ML')
+
+summary(arimax_model_colgate)
+```
+  
+  The significance of the coefficients is then verified:
+  
+```{r}
+library(lmtest)
+coeftest(arimax_model_colgate)
+```
+  
+  Lastly, let's check the residuals:
+  
+```{r}
+checkresiduals(arimax_model_colgate)
+```
+  
+  
+  Mutandis mutatis for Crest:
+  
+```{r}
+arimax_model_crest <- arimax(crest_training,
+                       order = c(0,1,1), #orden del ARIMA
+                       xtransf = data.frame(I1 = (1*(seq(crest_training) == outliers_crest_idx))),  #matriz con 1 donde haya outliers y 0 en lo demás            
+                       transfer = list(c(0,0,0)), #porque p=0
+                       method = 'ML')
+
+summary(arimax_model_crest)
+```
+  
+```{r}
+coeftest(arimax_model_crest)
+```
+  
+```{r}
+checkresiduals(arimax_model_crest)
+```
+  
+# Transference Function
+
+```{r}
+mod.transf.colgate <- arimax(x = colgate_training, order = c(1, 0, 1), 
+                                 xtransf = data.frame(crest_training), # Atípico aditivo
+                                 transfer = list(c(0,0)), # Primero el step y luego el pulse
+                                 method = "ML")
+mod.transf.colgate
+
+```
+
+```{r}
+coeftest(mod.transf.colgate)
+```
+
+
+```
+

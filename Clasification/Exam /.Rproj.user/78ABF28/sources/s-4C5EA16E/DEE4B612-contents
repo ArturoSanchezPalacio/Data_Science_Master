@@ -1,0 +1,462 @@
+---
+title: "Examen Clasificación Febrero 2019"
+output: html_notebook
+author: "Arturo Sánchez Palacio"
+---
+
+# Carga de datos
+
+En primer lugar se cargan los datos en R:
+
+```{r}
+library(openxlsx)
+data <- read.xlsx("./data/BDexamen2.xlsx")
+```
+
+Se comprueba que se han cargado de manera correcta:
+
+```{r}
+dim(data)
+str(data)
+```
+
+Se observa que muchas de las variables categóricas han sido cargadas como numéricas y se procede a subsanar el error:
+
+```{r}
+data$cat2 <- as.factor(data$cat2)
+data$cat3 <- as.factor(data$cat3)
+data$DENSIDAD <- as.factor(data$DENSIDAD)
+data$TAMAMU <- as.factor(data$TAMAMU)
+data$SEXO <- as.factor(data$SEXO)
+data$ESTUD <- as.factor(data$ESTUD)
+data$LAB <- as.factor(data$LAB)
+data$REGTEN <- as.factor(data$REGTEN)
+```
+
+Además la variable edad se ha leído como string siendo un entero. Comprobamos que no hay nada raro en ella y la transformamos en entero:
+
+```{r}
+unique(data$EDAD)
+data$EDAD <- as.integer(data$EDAD)
+```
+
+Si observamos ahora los datos ya encuentran en un formato óptimo para trabajar con ellos:
+
+```{r}
+str(data)
+```
+
+ Finalmente una vez los datos se han limpiado se lleva a cabo un pequeño análisis exploratorio.
+ 
+# Análisis exploratorio
+
+Para realizar el análisis exploratorio se dividen las variables en numéricas y categóricas pues se emplean distintos análisis para cada tipo.
+
+Para las variables numéricas:
+ 
+```{r}
+numeric <- data[,c(3, 8,9)]
+summary(numeric)
+print("Varianzas:")
+apply(numeric, 2, var)
+```
+ 
+y en cuanto a las variables categóricas:
+
+```{r}
+cualitative <- data[, c(1,2,4:7,10,11)]
+summary(cualitative)
+```
+
+
+
+
+# Tratamiento de los NA
+
+La base de datos solo presenta 168 valores no definidos todos ellos situados en la columan superficie. Se plantean dos opciones para subsanar este problema:
+
+Elimanar las observaciones con NA por no llegar a suponer estas un 4% de la muestra:
+
+```{r}
+data <- na.omit(data)
+```
+
+Sustituir los NA's por la media o la mediana (realmente en el summary se aprecia que están muy próximas):
+
+```{r}
+data$SUPERF[is.na(data$SUPERF)] <- mean(data$SUPERF,na.rm = T)
+numeric <- data[,c(3, 8,9)]
+```
+
+En este caso nos hemos dectando por sustituir por la media
+
+Una vez se han tratado los NA's y se han explorado las variables se puede proceder al análisis pedido.
+
+Sobre las variables numéricas se puede llevar a cabo así mismo un análisis de correlación ahora que se han elimnado los NA's:
+
+```{r}
+cor(numeric)
+```
+
+Las variables numéricas se encuentran poco correlacionadas entre sí. 
+
+# Clasificación respecto a la variable cat2 (sin considerar cat3)
+
+Para proceder a dicha clasificación es necesario eliminar la variable cat3 de nuestra base de datos:
+
+```{r}
+datacat2 <- data[,-11]
+```
+
+Una vez hecho esto se procede al análisis logístico:
+
+En primer lugar se fija una semilla para garantizar la reproductibilidad del experimento. Tras ello se divide la base de datos en una muestra de entrenamiento y otra de test:
+
+```{r}
+set.seed(1234)
+train <- sample(nrow(datacat2), 0.8*nrow(datacat2))
+data.train <- datacat2[train,]
+data.test <- datacat2[-train,]
+```
+
+Una vez hecho esto se comprueba que las muestras estén balanceadas:
+
+```{r}
+table(data.train$cat2)
+table(data.test$cat2)
+```
+
+Las muestras están balanceadas por lo que se puede proseguir con el proceso de clasifacación.
+
+Dado que en la base de datos existen tanto variables cuantitativas como cualitativas se emplearán modelos de regresión logística. Construimos un primer modelo base que emplea todas las variables disponibles:
+
+```{r}
+basic.model <- glm(cat2 ~.,family = binomial(link = 'logit'),data = data.train)
+```
+
+Se obtiene un resumen de dicho modelo inicial:
+
+```{r}
+summary(basic.model)
+```
+
+Las variables más importantes parecen ser el régimen de tenencia, el sexo, la densidad de población de la zona de residencia, la situación laboral y los ingresos mensuales. En menor medida la superficie tampoco parece desdeñable.
+Se construye un nuevo modelo que solo tenga en consideración dichas variables:
+
+```{r}
+refined.model <- glm(cat2 ~ DENSIDAD + SEXO + LAB + REGTEN + SUPERF + IMPEXAC,family = binomial(link = 'logit'),data = data.train)
+```
+
+Obtenemos de nuevo un resumen del modelo:
+
+```{r}
+summary(refined.model)
+```
+
+
+
+ Se ha reducido el AIC por lo que el modelo no solo se simplifica si no que mejora. Realizamos un test ANOVA sobre el modelo:
+ 
+```{r}
+anova(refined.model, test = "Chisq")
+```
+ 
+La superficie de cuya capacidad clasificadora se dudaba en un principio parece finalmente aportar información relevante que se perdería si se prescindiera de ella así que debe mantenerse. De la misma manera todas las variables tienen un nivel de significación alto por lo que este será nuestro modelo definitivo.
+ 
+```{r}
+refined.model2 <- glm(cat2 ~ SEXO + LAB + REGTEN + IMPEXAC + cat3,family = binomial(link = 'logit'),data = data.train)
+summary(refined.model2)
+```
+ 
+ El modelo resultante es más sencillo (mejor en el sentido del criterio de Parsimonia) y tiene asociado un AIC mejor.
+ 
+```{r}
+anova(refined.model2, test = "Chisq")
+```
+ 
+ Parece que todos los coeficientes son muy significativos por lo que este será nuestro modelo definitivo.
+ 
+```{r}
+library(pscl)
+pR2(basic.model)
+pR2(refined.model)
+pR2(refined.model2)
+```
+ 
+ El R^2 de McFadden confirma lo que ya nos avanzaba el AIC, el último modelo es el mejor. 
+ 
+
+ 
+ 
+ Así una vez elegido el modelo vamos a testear con el conjunto de validación obteniendo la matriz de confusión:
+ 
+```{r}
+fitted.results <- predict(refined.model2, newdata = data.test, type = 'response')
+fitted.results <- ifelse(fitted.results > 0.5,1,0)
+fitted.results <- factor(fitted.results, levels = c(0,1), labels = c("No", "Sí"))
+(logit.perf <- table(data.test$cat2, fitted.results, dnn = c("Actual", "Predicted")))
+```
+ 
+ y el accuracy:
+ 
+```{r}
+print(paste('Accuracy',sum(diag(logit.perf))/sum(logit.perf)))
+```
+ 
+ Además podemos visualizar los aciertos de la clasificación mediante una curva ROC:
+ 
+```{r}
+library(pROC)
+resRoc <- roc(data.test$cat2 ~ as.numeric(fitted.results))
+plot(resRoc, legacy.axes = TRUE)
+library(rms)
+auc(data.test$cat2, as.numeric(fitted.results))
+```
+ 
+# Interpretación del modelo
+
+Ahora que ya se ha construido el modelo definitivo se procede a su interpretación:
+
+```{r}
+anova(refined.model2, test = "Chisq")
+```
+
+ Las Deviance indican el roden de importancia de las variables así la más importante con diferencia es el régimen de tenencia de la vivneda seguido por el cat3 (bastante obvio) y sus ingresos mensuales. En menor medida influye su situación laboral y su género.
+ 
+ Respecto a los odd ratio:
+ 
+```{r}
+coef(refined.model2)
+```
+ 
+Que el IMPEXAC sea positivo quiere decir que a medida que aumentan los ingresos aumenta la probabilidad de cat2=1, es decir, consumo NO bajo.
+
+Con las ocupaciones se aprecia la siguiente dinámica: a medida que se avanza se va reduciendo la probabilidad por lo que es más probable que el consumo sea bajo. 
+
+
+# Árboles para cat3
+
+En primer lugar se plantean árboles que parten de todas las variables. Para ello se emplearán las siguientes bibliotecas:
+
+```{r}
+library(rpart) 
+library(rpart.plot) 
+library(partykit) 
+library(party) #Construcción de árboles de inferencia
+
+```
+
+
+## Árbol con todas las variables
+
+```{r}
+general_tree <- rpart(cat3 ~ ., data = data.train, method = "class",
+                      parms = list(split = "information"))
+print(general_tree)
+summary(general_tree)
+```
+
+Se muestra una tabla con la complejidad paramétrica:
+
+```{r}
+general_tree$cptable
+```
+
+Y se grafica la curva:
+
+```{r}
+plotcp(general_tree)
+```
+
+Se debe podar en el punto con el menor error relativo asociado así que se elige en este caso 0.017.
+
+```{r}
+pruned_general_tree <- prune(general_tree, cp = 0.017)
+```
+
+Tras ello representamos el árbol:
+
+```{r}
+prp(pruned_general_tree, type = 2, extra = 104,
+fallen.leaves = TRUE, main = "Árbol general de decisión podado")
+```
+
+
+Para medir la bondad de este árbol se procede a predecir sobre el conjunto de test. Predecimos en primer lugar sobre el árbol general:
+
+```{r}
+pred_general_tree <- predict(general_tree, data.test, type = "class")
+general_pred_table <- table(data.test$cat3, pred_general_tree, dnn = c("Actual", "Predicted"))
+general_pred_table
+```
+
+```{r}
+sum(diag(general_pred_table))/dim(data.test)[1]
+```
+ 
+ Y para el árbol podado:
+ 
+```{r}
+pred_general_pruned_tree <- predict(pruned_general_tree, data.test, type = "class")
+general_pruned_pred_table <- table(data.test$cat3, pred_general_pruned_tree, dnn = c("Actual", "Predicted"))
+general_pruned_pred_table
+```
+ 
+```{r}
+sum(diag(general_pruned_pred_table))/dim(data.test)[1]
+```
+ 
+ Ambos árboles dan la misma matriz de confusión y la misma exactitud.
+ 
+ 
+### Explicación del árbol
+
+La variable con mayor poder de decisión es ...
+
+# Árbol de inferencia
+
+Se procede a construir un árbol de inferencia a partir de todas las variables:
+
+```{r}
+general_inference_tree <- ctree(cat3~., data = data.train) 
+plot(general_inference_tree, main = "Árbol general de inferencia")
+```
+
+De nuevo se testea obteniendo la matriz de confusión:
+
+```{r}
+
+pred_conditional_general_tree <- predict(general_inference_tree, data.test, type = "response")
+general_conditional_pred_table <- table(data.test$cat3, pred_conditional_general_tree, dnn = c("Actual", "Predicted"))
+general_conditional_pred_table
+
+```
+
+y la exactitud:
+
+```{r}
+sum(diag(general_conditional_pred_table))/dim(data.test)[1]
+```
+
+La exactitud mejora una milésima (clasifica un caso mejor.A)
+
+## Árbol seleccionando variables
+
+Para seleccionar variables tengo que llevar a cabo una regresión sobre la variable cat3:
+
+```{r}
+library(glmnet)
+X_train <- model.matrix(cat3 ~., data.train)[,-11]
+y_train <- data.train$cat3
+X_test <- model.matrix(cat3 ~., data.test)[,-11]
+y_test <- data.test$cat3
+```
+
+
+```{r}
+fit = glmnet(X_train, y_train, family = "multinomial", type.multinomial = "grouped")
+cvfit=cv.glmnet(X_train, y_train, family="multinomial", type.multinomial = "grouped", parallel = TRUE)
+prediction_cat3 <- predict(cvfit, newx = X_test, s = "lambda.min", type = "class")
+
+```
+
+Una vez hecha la predicción construimos de nuevo la matriz de confusión:
+
+```{r}
+(mat_cat3 <- table(data.test$cat3, prediction_cat3, dnn = c("Actual", "Predicted")))
+```
+
+```{r}
+sum(diag(mat_cat3))/dim(data.test)[1]
+```
+
+```{r}
+coef(cvfit)
+```
+
+Las variables descartadas son EDAD y SUPERFICIE. Construimos un árbol sin ellas:
+
+```{r}
+selected_tree <- rpart(cat3 ~ TAMAMU + DENSIDAD + SEXO + ESTUD + LAB + REGTEN+ IMPEXAC, data = data.train, method = "class",
+                      parms = list(split = "information"))
+print(selected_tree)
+summary(selected_tree)
+```
+
+Se muestra una tabla con la complejidad paramétrica:
+
+```{r}
+selected_tree$cptable
+```
+
+Y se grafica la curva:
+
+```{r}
+plotcp(selected_tree)
+```
+
+
+Se debe podar en el punto con el menor error relativo asociado así que se elige en este caso 0.026.
+
+```{r}
+pruned_selected_tree <- prune(general_tree, cp = 0.026)
+```
+
+Tras ello representamos el árbol:
+
+```{r}
+prp(pruned_selected_tree, type = 2, extra = 104,
+fallen.leaves = TRUE, main = "Árbol de decisión con variables seleccionasdas podado")
+```
+
+Para medir la bondad de este árbol se procede a predecir sobre el conjunto de test. Predecimos en primer lugar sobre el árbol sin podar:
+
+```{r}
+pred_selected_tree <- predict(selected_tree, data.test, type = "class")
+selected_pred_table <- table(data.test$cat3, pred_selected_tree, dnn = c("Actual", "Predicted"))
+selected_pred_table
+```
+
+Calculamos el accuracy:
+
+```{r}
+sum(diag(selected_pred_table))/dim(data.test)[1]
+```
+
+Procedemos con el árbol podado:
+
+```{r}
+pred_selected_pruned_tree <- predict(pruned_selected_tree, data.test, type = "class")
+selected_pruned_pred_table <- table(data.test$cat3, pred_selected_pruned_tree, dnn = c("Actual", "Predicted"))
+selected_pruned_pred_table
+```
+
+Y de nuevo se obtiene el accuracy:
+
+```{r}
+sum(diag(selected_pruned_pred_table))/dim(data.test)[1]
+```
+
+Es bastante bueno (80%) y por ser el podado es óptimo en parsimonia y más fácil de explicar.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

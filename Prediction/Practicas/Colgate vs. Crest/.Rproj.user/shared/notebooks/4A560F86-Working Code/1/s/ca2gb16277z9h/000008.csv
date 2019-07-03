@@ -1,0 +1,4 @@
+"0","autoplot(mydata, facets = FALSE) +"
+"0","  ggtitle(""Cuotas de mercado de Crest y Colgate"") +"
+"0","  xlab(""Tiempo"") +"
+"0","  ylab(""Cuota de mercado"")"

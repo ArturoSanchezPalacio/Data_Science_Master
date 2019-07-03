@@ -1,0 +1,128 @@
+---
+title: "Danishuni mejorado"
+author : "Arturo Sánchez Palacio"
+output: html_notebook
+---
+
+En primer lugar se cargan las bibliotecas que vamos a emplear: 
+
+```{r}
+library(moments)
+library(actuar)
+library(fitdistrplus)
+library(ggplot2)
+library(MASS)
+library(CASdatasets)
+library(car)
+library(dplyr)
+library(lubridate)
+library(OpVaR)
+library(QRM)
+```
+
+# Carga de datos
+
+Tras esto se procede a la carga y al agrupamiento de datos y se comprueba que se han cargado de manera correcta:
+
+```{r}
+datos_agregados <- danishuni %>% group_by(semanas = floor_date(danishuni$Date, "week")) %>% summarize(siniestros = n(), Loss = sum(Loss))
+```
+
+Una vez hecho esto se procede al análisis exploratorio.
+
+# Análisis exploratorio
+
+Se plantea una primera aproximación a los datos:
+
+```{r}
+summary(datos_agregados)
+```
+
+La columna siniestros muestra la frecuencia con la que se producen las pérdidas (agrupada por semanas) y la columna Loss su severidad (de nuevo agregada por semanas)
+
+## Análisis frecuencia
+
+Para las frecuencias que son valores discretos se puede plantear una tabla:
+
+```{r}
+table(datos_agregados$siniestros)
+```
+
+```{r}
+length(datos_agregados$siniestros)
+sum(datos_agregados$siniestros)
+```
+
+Se produce un total de 2167 pérdidas repartidas a lo largo de 552 semanas.
+
+Se calcula el coeficiente de asimetría:
+
+```{r}
+skewness(datos_agregados$siniestros)
+```
+
+Como es positivo la asimetría es positiva, es decir,los valores se concentran a la izquierda.
+
+Se calcula la curtosis:
+
+```{r}
+kurtosis(datos_agregados$siniestros)
+```
+
+Es menor que 3 luego es platicúrtica. Tiene colas más pequeñas que una normal.
+
+Se calculan cuantiles:
+
+```{r}
+quantile(datos_agregados$siniestros,seq(0,1, 0.20)) 
+```
+
+```{r}
+quantile(datos_agregados$siniestros, seq(0.9,1, 0.01))
+```
+
+
+Por último se presenta el histograma de la distribución de frecuencia:
+
+```{r}
+hist(datos_agregados$siniestros, pch = 20, breaks = 25, prob = TRUE, main = "Histograma frecuencia",
+     xlab = "Número Fraudes", ylab = "Frecuencia")
+```
+
+Se realizaría un razonamiento análogo para la severidad.
+
+# Ajustes de frecuencia y severidad 
+
+## Ajuste de frecuencia
+
+Empleamos un ajuste de máxima verosimilitud para la frecuencia:
+
+```{r}
+(fpois <- fitdist(datos_agregados$siniestros, "pois"))
+```
+
+Ajusta a la milésima y el error es bastante bajo así que parece un buen ajuste.
+
+```{r}
+plot(fpois)
+```
+
+Otro posible ajuste sería la binomial:
+
+```{r}
+(fnbinom <- fitdist(datos_agregados$siniestros, "nbinom"))
+```
+
+El error es mayor y la distribución más compleja por lo que se preferiría la Poisson (el parámetro size se ignora).
+
+Para confirmar esta decisión se puede construir el siguiente cuadro:
+
+```{r}
+gofstat(list(fpois, fnbinom), chisqbreaks = c(0:4, 9), discrete = TRUE,
+        fitnames = c("Poisson", "Binomial Negativa"))
+```
+
+La tabla son los valores reales y los teóricos según cada estimación. Si el p-valor hubiera sido pequeño habría que rechazar. Ambos p-valores son grandes por lo que ambas son válidas.
+
+Finalmente empleamos los criterios de información para elegir. Elegimos el que tiene criterio con menor coeficinete luego en este caso BIN Negativa.
+

@@ -1,0 +1,5 @@
+"0","sum(diag(last_pred_table))/dim(data.test2)[1]"
+"1","[1]"
+"1"," 0.7701422"
+"1","
+"

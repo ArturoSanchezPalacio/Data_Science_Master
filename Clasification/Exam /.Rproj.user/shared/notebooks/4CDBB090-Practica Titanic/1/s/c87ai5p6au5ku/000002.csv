@@ -1,0 +1,9 @@
+"0","```r
+logit.perf <- table(test$Survived, fitted.results, dnn = c(\"Actual\", \"Predicted\"))
+logit.perf
+```"
+"1","      Predicted
+Actual  0  1
+     0 51  5
+     1  9 24
+"

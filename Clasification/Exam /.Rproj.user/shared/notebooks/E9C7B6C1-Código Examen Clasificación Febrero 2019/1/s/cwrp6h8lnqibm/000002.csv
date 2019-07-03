@@ -1,0 +1,4 @@
+"0","datacat2 <- data[,-11]"
+"0","datacat2$SUPERF <- scale(datacat2$SUPERF)"
+"0","datacat2$EDAD <- scale(datacat2$EDAD)"
+"0","datacat2$IMPEXAC <- scale(datacat2$IMPEXAC)"

@@ -1,0 +1,24 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1544365990278.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "5C24C0F3",
+    "lastKnownWriteTime" : 1544367295,
+    "last_content_update" : 1544367295351,
+    "path" : "~/Documents/CUNEF/Clasificación/Tareas/Tarea 2. Regresión Logística/B.R",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "142,0",
+        "notebook_format" : "html_document",
+        "scrollLine" : "109",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

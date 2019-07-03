@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1550593172991.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1342360285",
+    "id" : "A287A4A6",
+    "lastKnownWriteTime" : 1550851237,
+    "last_content_update" : 1550851237846,
+    "path" : "~/Documents/CUNEF/Técnicas de Visualización/Practica Final/server.R",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "24,51",
+        "scrollLine" : "19"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

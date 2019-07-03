@@ -1,0 +1,225 @@
+---
+title: "Funciones de coste y descenso del gradiente"
+author: "Arturo Sánchez Palacio"
+date: "6 December 2018"
+output:
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+    number_sections: true
+---
+
+# Introduction to the gradient descent cost functions
+
+
+
+```{r}
+Sigmoid <- function(x) { 
+  1 / (1 + exp(-x))
+}
+
+# feed with data
+x <- seq(-5, 5, 0.01)
+
+# and plot
+plot(x, Sigmoid(x), col = 'blue', ylim = c(-.2, 1))
+abline(h = 0, v = 0, col = "gray60")
+```
+
+
+
+```{r}
+# Ref: https://www.r-bloggers.com/logistic-regression-with-r-step-by-step-implementation-part-2/
+# Cost Function
+# 
+CostFunction <- function(parameters, X, Y) {
+  n <- nrow(X)
+  # function to apply (%*% Matrix multiplication)
+  g <- Sigmoid(X %*% parameters)
+  J <- (1/n) * sum((-Y * log(g)) - ((1 - Y) * log(1 - g)))
+  return(J)
+}
+```
+
+
+
+
+Analyze your data
+
+```{r}
+#Load data
+data <- read.csv("data/4_1_data.csv")
+
+#Create plot
+plot(data$score.1, data$score.2, col = as.factor(data$label), xlab = "Score-1", ylab = "Score-2")
+```
+
+
+Let us set predictor and response variables.
+
+```{r}
+#Predictor variables
+X <- as.matrix(data[, c(1,2)])
+
+#Add ones to X in the first column (matrix multiplication x b)
+X <- cbind(rep(1, nrow(X)), X)
+
+#Response variable
+Y <- as.matrix(data$label)
+```
+
+
+```{r}
+#Intial parameters
+initial_parameters <- rep(0, ncol(X))
+
+#Cost at inital parameters
+CostFunction(initial_parameters, X, Y)
+```
+
+With each step of gradient descent, parameters come closer to the optimal values that will achieve the lowest cost. To do this we will set (i.e.) the iteration parameter to 1200
+
+```{r}
+# We want to minimize the cost function. Then derivate this funcion
+TestGradientDescent <- function(iterations = 1200, X, Y) {
+  
+  # Initialize (b, W)
+  parameters <- rep(0, ncol(X))
+  # Check evolution
+  print(paste("Initial Cost Function value: ", 
+              convergence <- c(CostFunction(parameters, X, Y)), sep = ""))
+  
+  # updating (b, W) using gradient update
+  
+  # Derive theta using gradient descent using optim function
+  # Look for information about the "optim" function (there are other options)
+  parameters_optimization <- optim(par = parameters, fn = CostFunction, X = X, Y = Y, 
+                                   control = list(maxit = iterations))
+  #set parameters
+  parameters <- parameters_optimization$par
+  
+  # Check evolution
+  print(paste("Final Cost Function value: ", 
+              convergence <- c(CostFunction(parameters, X, Y)), sep = ""))
+
+ return(parameters) 
+}
+
+# How to use
+parameters <- TestGradientDescent(X = X, Y = Y)
+# probability of admission for student (1 = b, for the calculos)
+new_student <- c(1,25,78)
+print("Probability of admission for student:")
+print(prob_new_student <- Sigmoid(t(new_student) %*% parameters))
+```
+Is he out? :-(
+
+Now, We're gonna to try other option
+
+```{r}
+if (!require("gradDescent")) install.packages("gradDescent")
+# load
+library("gradDescent")
+```
+
+New Gradient Descent version
+
+```{r}
+# We want to minimize the cost function. Then derivate this funcion
+TestGradientDescent2 <- function(iterations = 1200, learning_rate = 0.25, the_data) {
+  
+  # label in the last column in dataSet
+  model <- gradDescentR.learn(dataSet = the_data, featureScaling = TRUE, scalingMethod = "VARIANCE", 
+                              learningMethod = "GD", control = list(alpha = learning_rate, maxIter = iterations), 
+                              seed = 1234)
+  
+  model
+}
+
+# How to use
+TestGradientDescent2(the_data = data)
+
+# Now, the exercises. Use training and test set, change the value of alpha...
+```
+
+## Plus lesson - Unit test - Testing our code
+
+Unit tests are small functions that test your code and help you make sure everything is alright. To do this in R, the *testthat* package can be used as follows:
+
+```{r}
+# Install if not installed
+if (!require("testthat")) install.packages("testthat")
+# load
+library(testthat)
+```
+
+Now, we can check the code for the *TestGradientDescent* function.
+
+```{r}
+test_that("Test TestGradientDescent",{
+  parameters <- TestGradientDescent(X = X, Y = Y)
+  # probability of admission for student (1 = b, for the calculos)
+  new_student <- c(1,25,78)
+  prob_new_student <- Sigmoid(t(new_student) %*% parameters)
+  print(prob_new_student)
+  expect_equal(as.numeric(round(prob_new_student, digits = 4)), 0.0135)
+  # Fail, test
+  # expect_equal(as.numeric(round(prob_new_student, digits = 4)), 0.0130)
+})
+```
+
+
+# Assignment
+
+## Test the *TestGradientDescent* function with the training set (*4_1_data.csv*). Obtain the confusion matrix. 
+
+```{r}
+  parameters <- TestGradientDescent(X = X, Y = Y)
+  Z <- rep(0, length(Y)) #Creates a vector of zeros. If the student is supposed to pass the 0 is changed by 1.
+  for (i in 1:length(Y)) { #We test every student in the dataset
+    new_student <- c(1, X[[i,2]], X[[i,3]]) #The marks are taken
+    prob_new_student <- Sigmoid(t(new_student) %*% parameters) #The chance to be admited is calculated
+    if (prob_new_student > 0.7) { #The minimum grade for acceptance is established at 7. Students with an average grade lower than that are out.
+      Z[i] <- 1
+    }
+  }
+
+
+library(caret)
+confusionMatrix(data = as.factor(Z) , reference = as.factor(Y), dnn = c("Predicción", "Realidad"))
+```
+
+## Obtain a graph representing how the cost function evolves depending of the number of iterations.
+
+
+```{r}
+iteraciones <- 1:1000  #I chose a thousand iterations though the convergence appears close to the 200th iteration
+costes <- rep(0, length(iteraciones)) #Creates a vector of zeros which will be filled with the cost at each iteration
+TestCost <- function(X, Y) {
+  for (iterations in iteraciones) { #for each iteration the cost is calculated
+    # Initialize (b, W)
+    parameters <- rep(0, ncol(X))
+    
+    # updating (b, W) using gradient update
+    
+    # Derive theta using gradient descent using optim function
+    # Look for information about the "optim" function (there are other options)
+    parameters_optimization <- optim(par = parameters, fn = CostFunction, X = X, Y = Y, 
+                                     control = list(maxit = iterations))
+    #set parameters
+    parameters <- parameters_optimization$par
+    
+    # Check evolution
+    costes[iterations] <- convergence <- c(CostFunction(parameters, X, Y)) #Here the vector is filled
+  }
+  return(costes) 
+}
+costs <- TestCost(X,Y)
+plot(iteraciones, costs, "l", main = "Evolución de la función de coste según el número de iteraciones", xlab = "Iteraciones", ylab = "Función de coste")
+```
+
+
+
+

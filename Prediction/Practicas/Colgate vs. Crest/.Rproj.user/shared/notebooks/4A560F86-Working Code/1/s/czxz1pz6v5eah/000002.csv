@@ -1,0 +1,4 @@
+"0","checkresiduals(arimax_model_crest)"
+"2","Error in is.element(""lm"", class(object)) : 
+  objeto 'arimax_model_crest' no encontrado
+"

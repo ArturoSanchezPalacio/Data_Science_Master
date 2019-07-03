@@ -1,0 +1,3 @@
+"0","impact_Colgate <- CausalImpact(colgate_zoo, pre.period, post.period)"
+"0","impact_Crest <- CausalImpact(crest_zoo, pre.period, post.period)"
+"0","plot(impact_Colgate)"

@@ -1,0 +1,4 @@
+"0","set.seed(1234)"
+"0","train <- sample(nrow(datacat2), 0.8*nrow(datacat2))"
+"0","data.train <- datacat2[train,]"
+"0","data.test <- datacat2[-train,]"

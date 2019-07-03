@@ -1,0 +1,15 @@
+"0","```r
+contrasts(data$Sex)
+```"
+"1","       male
+female    0
+male      1
+"
+"0","```r
+contrasts(data$Embarked)
+```"
+"1","  Q S
+C 0 0
+Q 1 0
+S 0 1
+"

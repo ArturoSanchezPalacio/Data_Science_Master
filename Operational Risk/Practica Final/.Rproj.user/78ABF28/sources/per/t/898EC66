@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1559660933049.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "898EC66",
+    "lastKnownWriteTime" : 8315168087917723654,
+    "last_content_update" : 1559660933049,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "F96B927",
+        "caption" : "danishuni",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=danishuni&cache_key=F96B927",
+        "displayedObservations" : 2167,
+        "environment" : "",
+        "object" : "danishuni",
+        "preview" : 0,
+        "totalObservations" : 2167,
+        "variables" : 2
+    },
+    "relative_order" : 6,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

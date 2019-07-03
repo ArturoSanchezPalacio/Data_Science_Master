@@ -1,0 +1,1 @@
+"0","pruned_selected_tree <- prune(general_tree, cp = 0.026)"

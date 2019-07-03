@@ -1,0 +1,24 @@
+"0","```r
+anova(model, test = \"Chisq\")
+```"
+"1","Analysis of Deviance Table
+
+Model: binomial, link: logit
+
+Response: Survived
+
+Terms added sequentially (first to last)
+
+
+         Df Deviance Resid. Df Resid. Dev  Pr(>Chi)    
+NULL                       799    1065.39              
+Pclass    1   83.607       798     981.79 < 2.2e-16 ***
+Sex       1  240.014       797     741.77 < 2.2e-16 ***
+Age       1   17.495       796     724.28 2.881e-05 ***
+SibSp     1   10.842       795     713.43  0.000992 ***
+Parch     1    0.863       794     712.57  0.352873    
+Fare      1    0.994       793     711.58  0.318717    
+Embarked  2    2.187       791     709.39  0.334990    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+"

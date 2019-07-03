@@ -1,0 +1,5 @@
+"0","library(zoo)"
+"0","period <- seq(as.Date('1958/01/08'), as.Date('1962/12/26'), by = 'week')"
+"0","data_zoo <- zoo(cbind(training_data$Crest, training_data$Colgate), period)"
+"0","crest_zoo <- zoo(training_data$Crest, period)"
+"0","colgate_zoo <- zoo(training_data$Colgate, period)"

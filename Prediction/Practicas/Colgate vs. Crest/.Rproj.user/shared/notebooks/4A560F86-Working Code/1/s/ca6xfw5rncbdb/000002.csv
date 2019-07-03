@@ -1,0 +1,76 @@
+"0","print(""WHOLE DATA"")"
+"1","[1]"
+"1"," ""WHOLE DATA"""
+"1","
+"
+"0","summary(impact_combined, ""report"")"
+"1","Analysis report {CausalImpact}
+"
+"1","
+
+During the post-intervention period, the response variable had an average value of approx. 0.36. By contrast, in the absence of an intervention, we would have expected an average response of 0.16. The 95% interval of this counterfactual prediction is [0.15, 0.18]. Subtracting this prediction from the observed response yields an estimate of the causal effect the intervention had on the response variable. This effect is 0.20 with a 95% interval of [0.18, 0.21]. For a discussion of the significance of this effect, see below.
+
+Summing up the individual data points during the post-intervention period (which can only sometimes be meaningfully interpreted), the response variable had an overall value of 45.49. By contrast, had the intervention not taken place, we would have expected a sum of 20.47. The 95% interval of this prediction is [18.60, 22.49].
+
+The above results are given in terms of absolute numbers. In relative terms, the response variable showed an increase of +122%. The 95% interval of this percentage is [+112%, +131%].
+
+This means that the positive effect observed during the intervention period is statistically significant and unlikely to be due to random fluctuations. It should be noted, however, that the question of whether this increase also bears substantive significance can only be answered by comparing the absolute effect (0.20) to the original goal of the underlying intervention.
+
+The probability of obtaining this effect by chance is very small (Bayesian one-sided tail-area probability p = 0.001). This means the causal effect can be considered statistically significant."
+"1"," "
+"1","
+"
+"0","print("""")"
+"1","[1]"
+"1"," """""
+"1","
+"
+"0","print(""COLGATE"")"
+"1","[1]"
+"1"," ""COLGATE"""
+"1","
+"
+"0","summary(impact_Colgate, ""report"")"
+"1","Analysis report {CausalImpact}
+"
+"1","
+
+During the post-intervention period, the response variable had an average value of approx. 0.27. By contrast, in the absence of an intervention, we would have expected an average response of 0.36. The 95% interval of this counterfactual prediction is [0.34, 0.38]. Subtracting this prediction from the observed response yields an estimate of the causal effect the intervention had on the response variable. This effect is -0.086 with a 95% interval of [-0.10, -0.069]. For a discussion of the significance of this effect, see below.
+
+Summing up the individual data points during the post-intervention period (which can only sometimes be meaningfully interpreted), the response variable had an overall value of 34.34. By contrast, had the intervention not taken place, we would have expected a sum of 45.19. The 95% interval of this prediction is [43.03, 47.47].
+
+The above results are given in terms of absolute numbers. In relative terms, the response variable showed a decrease of-24%. The 95% interval of this percentage is [-29%, -19%].
+
+This means that the negative effect observed during the intervention period is statistically significant. If the experimenter had expected a positive effect, it is recommended to double-check whether anomalies in the control variables may have caused an overly optimistic expectation of what should have happened in the response variable in the absence of the intervention.
+
+The probability of obtaining this effect by chance is very small (Bayesian one-sided tail-area probability p = 0.001). This means the causal effect can be considered statistically significant."
+"1"," "
+"1","
+"
+"0","print("""")"
+"1","[1]"
+"1"," """""
+"1","
+"
+"0","print(""CREST"")"
+"1","[1]"
+"1"," ""CREST"""
+"1","
+"
+"0","summary(impact_Crest, ""report"")"
+"1","Analysis report {CausalImpact}
+"
+"1","
+
+During the post-intervention period, the response variable had an average value of approx. 0.36. By contrast, in the absence of an intervention, we would have expected an average response of 0.14. The 95% interval of this counterfactual prediction is [0.13, 0.16]. Subtracting this prediction from the observed response yields an estimate of the causal effect the intervention had on the response variable. This effect is 0.22 with a 95% interval of [0.20, 0.23]. For a discussion of the significance of this effect, see below.
+
+Summing up the individual data points during the post-intervention period (which can only sometimes be meaningfully interpreted), the response variable had an overall value of 45.49. By contrast, had the intervention not taken place, we would have expected a sum of 17.96. The 95% interval of this prediction is [16.32, 19.82].
+
+The above results are given in terms of absolute numbers. In relative terms, the response variable showed an increase of +153%. The 95% interval of this percentage is [+143%, +162%].
+
+This means that the positive effect observed during the intervention period is statistically significant and unlikely to be due to random fluctuations. It should be noted, however, that the question of whether this increase also bears substantive significance can only be answered by comparing the absolute effect (0.22) to the original goal of the underlying intervention.
+
+The probability of obtaining this effect by chance is very small (Bayesian one-sided tail-area probability p = 0.01). This means the causal effect can be considered statistically significant."
+"1"," "
+"1","
+"

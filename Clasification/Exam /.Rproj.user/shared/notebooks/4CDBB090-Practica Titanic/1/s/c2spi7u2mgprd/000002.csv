@@ -1,0 +1,8 @@
+"0","```r
+exp(coef(model))
+```"
+"1"," (Intercept)       Pclass      Sexmale          Age        SibSp        Parch         Fare    EmbarkedQ 
+170.31116493   0.33717391   0.06349342   0.96341847   0.74608157   0.88996209   1.00152965   0.99734737 
+   EmbarkedS 
+  0.72703115 
+"

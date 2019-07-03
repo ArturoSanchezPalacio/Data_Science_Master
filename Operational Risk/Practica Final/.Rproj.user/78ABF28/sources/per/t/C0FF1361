@@ -1,0 +1,24 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1559660138953.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "327713685",
+    "id" : "C0FF1361",
+    "lastKnownWriteTime" : 1559670261,
+    "last_content_update" : 1559670261277,
+    "path" : "~/Documents/CUNEF/Riesgo operacional/Practica Final/dani_mejorado.Rmd",
+    "project_path" : "dani_mejorado.Rmd",
+    "properties" : {
+        "chunk_output_type" : "inline",
+        "cursorPosition" : "128,0",
+        "scrollLine" : "0",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

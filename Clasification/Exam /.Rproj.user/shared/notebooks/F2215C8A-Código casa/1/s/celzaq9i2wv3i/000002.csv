@@ -1,0 +1,2 @@
+"0","refined.model <- glm(cat2 ~ DENSIDAD + SEXO + LAB + REGTEN + SUPERF + IMPEXAC,family = binomial(link = 'logit'),data = data.train)"
+"2","glm.fit: fitted probabilities numerically 0 or 1 occurred"

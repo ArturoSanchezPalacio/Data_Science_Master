@@ -1,0 +1,2 @@
+"0","hist(datos_agregados$siniestros, pch = 20, breaks = 25, prob = TRUE, main = ""Histograma frecuencia"","
+"0","     xlab = ""Número Fraudes"", ylab = ""Frecuencia"")"

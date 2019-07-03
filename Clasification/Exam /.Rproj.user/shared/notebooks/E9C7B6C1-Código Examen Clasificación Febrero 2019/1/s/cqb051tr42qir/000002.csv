@@ -1,0 +1,8 @@
+"0","data$cat2 <- as.factor(data$cat2)"
+"0","data$cat3 <- as.factor(data$cat3)"
+"0","data$DENSIDAD <- as.factor(data$DENSIDAD)"
+"0","data$TAMAMU <- as.factor(data$TAMAMU)"
+"0","data$SEXO <- as.factor(data$SEXO)"
+"0","data$ESTUD <- as.factor(data$ESTUD)"
+"0","data$LAB <- as.factor(data$LAB)"
+"0","data$REGTEN <- as.factor(data$REGTEN)"

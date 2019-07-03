@@ -1,0 +1,11 @@
+"0","```r
+misClasificError <- mean(fitted.results != test$Survived)
+print(paste('Accuracy',1 - misClasificError))
+```"
+"1","[1] \"Accuracy 0.842696629213483\"
+"
+"0","```r
+print(paste('Error', misClasificError))
+```"
+"1","[1] \"Error 0.157303370786517\"
+"

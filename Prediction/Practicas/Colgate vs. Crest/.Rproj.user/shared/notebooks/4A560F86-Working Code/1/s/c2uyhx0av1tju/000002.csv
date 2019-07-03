@@ -1,0 +1,2 @@
+"0","colgate <- ts(data$Colgate, start = 1958, frequency = 52)"
+"0","crest <- ts(data$Crest, start = 1958, frequency = 52)"

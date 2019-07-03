@@ -1,0 +1,57 @@
+"0","library(rpart) "
+"2","
+Attaching package: ‘rpart’
+
+"
+"2","The following object is masked from ‘package:survival’:
+
+    solder
+
+"
+"0","library(rpart.plot) "
+"0","library(partykit) "
+"2","Loading required package: grid
+"
+"2","Loading required package: libcoin
+"
+"2","Loading required package: mvtnorm
+"
+"0","library(party) #Construcción de árboles de inferencia"
+"2","Loading required package: modeltools
+"
+"2","Loading required package: stats4
+"
+"2","
+Attaching package: ‘modeltools’
+
+"
+"2","The following object is masked from ‘package:rms’:
+
+    Predict
+
+"
+"2","Loading required package: strucchange
+"
+"2","Loading required package: zoo
+"
+"2","
+Attaching package: ‘zoo’
+
+"
+"2","The following objects are masked from ‘package:base’:
+
+    as.Date, as.Date.numeric
+
+"
+"2","Loading required package: sandwich
+"
+"2","
+Attaching package: ‘party’
+
+"
+"2","The following objects are masked from ‘package:partykit’:
+
+    cforest, ctree, ctree_control, edge_simple, mob, mob_control, node_barplot, node_bivplot,
+    node_boxplot, node_inner, node_surv, node_terminal, varimp
+
+"

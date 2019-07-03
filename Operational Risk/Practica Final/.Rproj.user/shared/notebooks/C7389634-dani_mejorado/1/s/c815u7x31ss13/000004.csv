@@ -1,0 +1,11 @@
+"0","(fpois <- fitdist(datos_agregados$siniestros, ""pois""))"
+"2","NaNs produced"
+"2","NaNs produced"
+"1","Fitting of the distribution '"
+"1"," "
+"1","pois"
+"1"," "
+"1","' by maximum likelihood 
+"
+"1","Parameters:
+"

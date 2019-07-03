@@ -1,0 +1,3 @@
+"0","ggseasonplot(colgate, month.labels = TRUE, month.labels.left = TRUE) +"
+"0","  ylab(""Market Share"") +"
+"0","  ggtitle(""Seasonal plot: Colgate Market Share"")"

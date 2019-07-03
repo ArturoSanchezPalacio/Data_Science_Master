@@ -1,0 +1,5 @@
+"0","sum(diag(general_pred_table))/dim(data.test)[1]"
+"1","[1]"
+"1"," 0.8791469"
+"1","
+"

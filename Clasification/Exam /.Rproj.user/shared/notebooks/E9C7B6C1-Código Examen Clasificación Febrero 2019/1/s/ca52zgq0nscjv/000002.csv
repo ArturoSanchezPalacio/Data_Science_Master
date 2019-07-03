@@ -1,0 +1,5 @@
+"0","library(openxlsx)"
+"2","Error in names(frame) <- `*vtmp*` : 
+  names() aplicado a un objeto que no es un vector
+"
+"0","data <- read.xlsx(""./data/BDexamen2.xlsx"")"

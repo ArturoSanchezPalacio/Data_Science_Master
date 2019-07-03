@@ -1,0 +1,2 @@
+"0","general_inference_tree3 <- ctree(cat3~., data = data.train2) "
+"0","plot(general_inference_tree3, main = ""Árbol general de inferencia"")"

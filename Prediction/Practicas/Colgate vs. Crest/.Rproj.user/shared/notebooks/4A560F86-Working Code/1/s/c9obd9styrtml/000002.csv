@@ -1,0 +1,3 @@
+"0","ggsubseriesplot(colgate) +"
+"0","  ylab(""$ million"") +"
+"0","  ggtitle(""Seasonal subseries plot: Colgate Market Share"")"

@@ -1,0 +1,3 @@
+"0","library(openxlsx)"
+"0","data <- read.xlsx(""data.xlsx"", colNames = TRUE, detectDates = TRUE)"
+"0","head(data)"

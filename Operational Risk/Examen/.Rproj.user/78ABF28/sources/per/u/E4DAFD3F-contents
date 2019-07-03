@@ -1,0 +1,349 @@
+# Análisis del riesgo operativo en la empresa Vikings Fish Co #
+
+# Cargar librerias
+library(CASdatasets) #libreria que contiene la BBDD danishuni
+library(actuar) #libreria para análisis de riesgo operativo
+library(fitdistrplus) #ajustar la distribucion con fitdis
+library(ggplot2) # creacion de graficos
+library(moments) # analisis asimetria y kurtosis
+library(dplyr) #manipular datos
+library(lubridate) # usar floor_date (agrupacion de fechas)
+
+# Cargar los datos
+data(danishuni)
+
+# Tratamiento de los datos (agrupacion por mes)
+# Objetivo obtener la frecuencia en las perdidas mensuales
+df_perdidas <- danishuni %>% 
+  group_by(floor_date(Date, 'months')) %>% 
+  summarise(Freq = length(Loss), PerdidasM = sum(Loss)) 
+
+# 1) ANALISIS EXPLORATORIO
+
+# A) Frecuencia de las perdidas mensuales
+frecuencia <- df_perdidas$Freq
+
+# Alta concentracion de valores en el centro de la distribucion
+table(frecuencia)
+# La media y la mediana se encuentran un poco lejanas
+summary(frecuencia)
+# Existe una alta varianza en la frecuencia mensual 
+var(frecuencia)  
+# Existe una asimetria positiva (sesgo a la derecha de la distribución)
+skewness(frecuencia)
+# Apuntamiento en el cuerpo de la distribucion
+kurtosis(frecuencia)
+
+# Graficar la distribucion frecuencia
+png("./imagenes/distribucion frecuencia.png", width = 800, height = 500)
+ggplot(df_perdidas) + geom_density(aes(Freq), fill = 'gray') +
+  xlab('Frecuencia') + ylab('Densidad')
+dev.off()
+
+# Cuantiles
+quantile(frecuencia, probs = c(0.05, 0.95))
+quantile(frecuencia, seq(0,1, 0.20)) 
+quantile(frecuencia, seq(0.9,1, 0.01))
+# Se evidencia diferencia a partir del percentil 98% de los datos
+
+
+# B) Severidad de las perdidas mensuales
+severidad <- df_perdidas$PerdidasM
+
+# Gran cantidad de valores en el centro de la distribución
+table(severidad)
+# La media y la mediana se encuentran lejanas
+summary(severidad)
+# Existe una alta varianza en la severidad mensual 
+var(severidad)  
+# Existe una asimetria positiva (sesgo a la derecha de la distribución)
+skewness(severidad)
+# Apuntamiento en el cuerpo de la distribucion
+kurtosis(severidad)
+
+# Graficar la distribucion severidad
+png("./imagenes/distribucion severidad.png", width = 800, height = 500)
+ggplot(df_perdidas) + geom_density(aes(PerdidasM), fill = 'gray') +
+  xlab('Severidad') + ylab('Densidad')
+dev.off()
+
+# Cuantiles
+quantile(severidad, probs = c(0.05, 0.95))
+quantile(severidad, seq(0,1, 0.20)) 
+quantile(severidad, seq(0.9,1, 0.01))
+# Se evidencia una marcada diferencia a partir del percentil 99%
+
+# ----
+
+# 2) Selección del modelo: inferencia paramétrica
+
+# A) Frecuencia de las perdidas mensuales
+
+# Distribucion Poisson, metodo máxima verosimilitud
+fpois = fitdist(frecuencia, "pois", method = 'mle')
+summary(fpois)
+plot(fpois)
+
+# Distribucion  Binomial Negativa, metodo máxima verosimilitud
+fnbinom = fitdist(frecuencia, "nbinom", 'mle')
+summary(fnbinom)
+plot(fnbinom)
+
+# La distribución se ajusta mejor a una binomial negativa
+png("./imagenes/ajuste_frecuencia.png", width = 800, height = 500)
+cdfcomp(list(fpois, fnbinom))
+dev.off()
+
+# Pruebas de bondad de ajuste
+ba_discreta <- gofstat(list(fpois, fnbinom), chisqbreaks = c(7:16, 37), discrete = TRUE,
+                       fitnames = c("Poisson", "Binomial Negativa"))
+
+# Estadítico de bondad de ajuste: Chi test(pvalue)
+ba_discreta$chisqpvalue #no se rechaza Ho en Bino. Nega son similares las distribuciones 
+
+# Criterio de bondad de ajuste (AIC y BIC)
+ba_discreta$aic; ba_discreta$bic #se escoge la Bino. Neg por menor aic y bic
+
+# Resultado: La distribucion de frecuencia se ajusta mejor 
+# con una binomial negativa
+size = fnbinom$estimate[1]
+mu = fnbinom$estimate[2]
+
+
+# B) Severidad de las perdidas mensuales
+
+# GAMMA
+fgam <- fitdist(severidad, "gamma", lower = 0)
+summary(fgam)
+plot(fgam)
+
+# PARETO
+fpar <- fitdist(severidad, "pareto", start = list(shape = 2, scale = 3))
+summary(fpar)
+plot(fpar)
+
+# BURR
+fburr <- fitdist(severidad, "burr", method = 'mle', start = list(shape1 = 2, shape2 = 2, scale = 2),
+                 lower = c(0, 0, 0))
+summary(fburr)
+plot(fburr)
+
+# Pruebas de bondad de ajuste
+ba_continua <- gofstat(list(fgam, fpar, fburr), chisqbreaks = c(14:23), discrete = FALSE,
+                       fitnames = c("GAMM", "Pareto", "Burr"))
+
+# Estadítico de bondad de ajuste: Kolmogorov-Smirnov statistic
+ba_continua$ks
+ba_continua$kstest
+
+# Criterio de bondad de ajuste
+ba_continua$aic; ba_continua$bic
+
+# Comprobacion grafica entre las distribuciones continuas
+FDD = cdfcomp(list(fgam, fpar, fburr), xlogscale = TRUE,
+              ylab = "Probabilidad", datapch = ".",
+              datacol = "red", fitcol = c("black", "green", "blue"), 
+              fitlty = 2:5, legendtext = c("Gamma", "Pareto", "Burr"),
+              main = "Ajuste pérdidas", plotstyle = "ggplot")
+
+# La distribución se ajusta mejor a burr
+png("./imagenes/ajuste_severidad.png", width = 800, height = 500)
+FDD
+dev.off()
+
+# Resultado: La distribucion de severidad se ajusta mejor 
+# con una distribución burr
+shape1 = fburr$estimate[1]
+shape2 = fburr$estimate[2]
+scale1 = fburr$estimate[3]
+
+# ----
+
+# 3) Análisis de Valores Extremos
+
+
+#Block Maxima: Extrac. de los valores max de cada AÑO
+
+# Obtener la pérdida maxima por año
+danishuni %>% group_by(floor_date(Date, 'year')) %>% 
+  summarise(con = max(Loss))
+
+# Exceso sobre umbral. Extrac. de Valores que exceden un umbral (POT)
+u <- 54
+exceden_umbral <- severidad[severidad > u]
+exceden_umbral
+
+#Visualizacion de las colas
+n.u <- length(exceden_umbral) #n de casos que superan el umbral
+
+surv.prob <- 1 - base::rank(exceden_umbral)/(n.u + 1)  #rank ofrece el n de orden
+surv.prob
+
+# Graficar la ditribución empricial y la de superviencia ajustada
+plot(exceden_umbral, surv.prob, log = "xy", xlab = "Excesos", 
+     ylab = "Probabilidades", ylim = c(0.01, 1))
+
+
+#Añadimos las prob teoricas de la D.Pareto
+
+#Determinamos los parámetros necesarios
+alpha <- -cov(log(exceden_umbral), log(surv.prob)) / var(log(exceden_umbral))
+alpha 
+
+x = seq(u, max(exceden_umbral), length = 100) #divide de u a max() 100 interv.
+y = (x / u)^(-alpha)
+lines(x, y)
+
+#Función de distribución acumulada
+prob <- rank(exceden_umbral) / (n.u + 1)
+plot(exceden_umbral, prob, log = "x", xlab = "Excesos", ylab = "Probabilidades de no excesos")
+y = 1 - (x / u)^(-alpha)
+lines(x, y)
+
+
+########  ESTIMACION
+
+#Distribucion valores extremos generalizados (GEV) 
+nllik.gev <- function(par, data){
+  mu <- par[1]
+  sigma <- par[2]
+  xi <- par[3]
+  if ((sigma <= 0) | (xi <= -1))
+    return(1e6)
+  n <- length(data)
+  if (xi == 0)
+    n * log(sigma) + sum((data - mu) / sigma) +
+    sum(exp(-(data - mu) / sigma))
+  else {
+    if (any((1 + xi * (data - mu) / sigma) <= 0))
+      return(1e6)
+    n * log(sigma) + (1 + 1 / xi) *
+      sum(log(1 + xi * (data - mu) / sigma)) +
+      sum((1 + xi * (data - mu) / sigma)^(-1/xi))
+  }
+}
+
+# GEV
+sigma.start <- sqrt(6) * sd(exceden_umbral) / pi
+mu.start <- mean(exceden_umbral) + digamma(1) * sigma.start
+fit.gev <- nlm(nllik.gev, c(mu.start, sigma.start, 0),
+               hessian = TRUE, data = exceden_umbral)
+fit.gev
+
+# Parametros: posición, escala y forma
+fit.gev$estimate 
+sqrt(diag(solve(fit.gev$hessian))) 
+# El indice de cola es significativo y positivo en GEV
+
+# B) Modelo Poisson-Generalizada de Pareto 
+nllik.gp <- function(par, u, data){
+  tau <- par[1]
+  xi <- par[2]
+  if ((tau <= 0) | (xi < -1))
+    return(1e6)
+  m <- length(data)
+  if (xi == 0)
+    m * log(tau) + sum(data - u) / tau
+  else {
+    if (any((1 + xi * (data - u) / tau) <= 0))
+      return(1e6)
+    m * log(tau) + (1 + 1 / xi) *
+      sum(log(1 + xi * (data - u) / tau))
+  }
+}
+
+# Obtención de los parámetros PARETO
+tau.start <- mean(exceden_umbral) - u #valores medios entre el umbral y los excesos
+fit.gp <- nlm(nllik.gp, c(tau.start, 0), u = u, hessian = TRUE,
+              data = exceden_umbral)
+fit.gp
+fit.gp$estimate 
+sqrt(diag(solve(fit.gp$hessian))) 
+#El parametro es tau = 19.21 e indice de cola 0.31 
+
+
+#Intervalo de confianza del valor máximo del indice de cola al 95%
+prof.nllik.gp <- function(par,xi, u, data)
+  nllik.gp(c(par,xi), u, data)
+prof.fit.gp <- function(x)
+  -nlm(prof.nllik.gp, tau.start, xi = x, u = u, hessian = TRUE,
+       data = exceden_umbral)$minimum #ojo cambiar base de datos
+vxi = seq(0,1.8,by = .025)
+prof.lik <- Vectorize(prof.fit.gp)(vxi)
+
+# Grafico intervalos de confianza
+png("./imagenes/perfil_verosimilutd.png", width = 800, height = 500)
+plot(vxi, prof.lik, type = "l", xlab = expression(xi),
+     ylab = "Profile log-likelihood")
+opt <- optimize(f = prof.fit.gp, interval = c(0,3), maximum = TRUE)
+opt
+
+up <- opt$objective
+abline(h = up, lty = 2)
+abline(h = up - qchisq(p = 0.95, df = 1), col = "grey")
+I <- which(prof.lik >= up - qchisq(p = 0.95, df = 1))
+lines(vxi[I], rep(up - qchisq(p = 0.95, df = 1), length(I)),
+      lwd = 5, col = "grey")
+abline(v = range(vxi[I]), col = "grey", lty = 2)
+abline(v = opt$maximum, col = "grey")
+dev.off()
+
+#### VALIDACION DEL MODELO
+
+# A) Q-Q Plot para la Dist. Generalizada de Pareto (DGP)
+qqgpd <- function(data, u, tau, xi){
+  excess <- data[data > u]
+  m <- length(excess)
+  prob <- 1:m / (m + 1)
+  x.hat <- u + tau / xi * ((1 - prob)^-xi - 1)
+  ylim <- xlim <- range(x.hat, excess)
+  plot(sort(excess), x.hat, xlab = "Quantiles en la muestra",
+       ylab = "Quantiles ajustados", xlim = xlim, ylim = ylim)
+  abline(0, 1, col = "grey")
+}
+
+png("./imagenes/qq_plot.png", width = 800, height = 500)
+qqgpd(severidad, u, fit.gp$estimate[1], fit.gp$estimate[2]) #umbral, tau y indice cola
+dev.off()
+
+#P-P Plot para la Dist. Generalizada de Pareto (DGP)
+ppgpd <- function(data, u, tau, xi){
+  excess <- data[data > u]
+  m <- length(excess)
+  emp.prob <- 1:m / (m + 1)
+  prob.hat <- 1 - (1 + xi * (sort(excess) - u) / tau)^(-1/xi)
+  plot(emp.prob, prob.hat, xlab = "Probabilidades empiricas",
+       ylab = "Probabilidades ajustadas", xlim = c(0, 1),
+       ylim = c(0, 1))
+  abline(0, 1, col = "grey")
+}
+
+png("./imagenes/pp_plot.png", width = 800, height = 500)
+ppgpd(severidad, u, fit.gp$estimate[1], fit.gp$estimate[2]) #umbral, tau y indice cola
+dev.off()
+
+# ---
+
+# 4) Función de distribucion de la perdidas agregadas F(s)
+
+
+# Simulacion de 1000 valores donde el modelo de frecuencia sigue una 
+# distribucion negativa binomial y el modelo de severidad sigue una 
+# distribucion burr (con los parametros antes determinados)
+
+perdidas_agregadas <- aggregateDist("simulation", 
+                                    model.freq = expression(y = rnbinom(size = size, mu = mu)),
+                                    model.sev = expression(y = rburr(shape1 = shape1, shape2 = shape2, scale = scale1)),
+                                    nb.simul = 1000)
+perdidas_agregadas
+
+# Graficar la función de pérdidas acumuladas
+png("./imagenes/funcion_perdidas_agregadas.png", width = 800, height = 500)
+plot(perdidas_agregadas)
+dev.off()
+
+# Estadísticos de la nueva función:
+summary(perdidas_agregadas)
+
+# Deteminacion del Value at Risk al 0.99%
+quantile(perdidas_agregadas, 0.99)

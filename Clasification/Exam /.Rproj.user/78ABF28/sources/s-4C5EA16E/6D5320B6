@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1549379902443.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "6D5320B6",
+    "lastKnownWriteTime" : 1549388213,
+    "last_content_update" : 1549388213279,
+    "path" : "~/Documents/CUNEF/Clasificación/Examen/Código Examen Clasificación Febrero 2019.Rmd",
+    "project_path" : null,
+    "properties" : {
+        "chunk_output_type" : "inline",
+        "cursorPosition" : "653,16",
+        "scrollLine" : "648"
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

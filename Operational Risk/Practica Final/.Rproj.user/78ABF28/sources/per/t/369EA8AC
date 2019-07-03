@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1557104080578.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "369EA8AC",
+    "lastKnownWriteTime" : 8315168087917723648,
+    "last_content_update" : 1557104080578,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "4C133ED9",
+        "caption" : "datos_agregados",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=datos_agregados&cache_key=4C133ED9",
+        "displayedObservations" : "552",
+        "environment" : "",
+        "object" : "datos_agregados",
+        "preview" : "0",
+        "totalObservations" : "552",
+        "variables" : "3"
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

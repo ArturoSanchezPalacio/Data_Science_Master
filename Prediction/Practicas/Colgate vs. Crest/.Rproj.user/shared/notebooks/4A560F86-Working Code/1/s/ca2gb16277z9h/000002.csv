@@ -1,0 +1,13 @@
+"0","library(fpp2)"
+"2","Loading required package: ggplot2
+"
+"2","Loading required package: forecast
+"
+"2","Loading required package: fma
+"
+"2","Loading required package: expsmooth
+"
+"0","autoplot(colgate) +"
+"0","  ggtitle(""Colgate Market Shares"") +"
+"0","  xlab(""Week"") +"
+"0","  ylab(""Market Share"")"

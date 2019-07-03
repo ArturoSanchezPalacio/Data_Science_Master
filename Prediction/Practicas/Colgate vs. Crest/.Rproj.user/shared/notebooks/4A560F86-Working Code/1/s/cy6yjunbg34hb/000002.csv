@@ -1,0 +1,31 @@
+"0","library(CausalImpact)"
+"2","Loading required package: bsts
+"
+"2","Loading required package: BoomSpikeSlab
+"
+"2","Loading required package: Boom
+"
+"2","Loading required package: MASS
+"
+"2","
+Attaching package: ‘MASS’
+
+"
+"2","The following objects are masked from ‘package:fma’:
+
+    cement, housing, petrol
+
+"
+"2","
+Attaching package: ‘Boom’
+
+"
+"2","The following object is masked from ‘package:stats’:
+
+    rWishart
+
+"
+"2","Loading required package: xts
+"
+"0","impact_combined <- CausalImpact(data_zoo, pre.period, post.period)"
+"0","plot(impact_combined)"

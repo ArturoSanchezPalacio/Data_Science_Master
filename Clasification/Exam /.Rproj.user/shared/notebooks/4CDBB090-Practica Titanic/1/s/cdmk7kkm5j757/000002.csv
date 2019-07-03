@@ -1,0 +1,4 @@
+"0","```r
+data <- data[!is.na(data$Embarked),]
+rownames(data) <- NULL
+```"

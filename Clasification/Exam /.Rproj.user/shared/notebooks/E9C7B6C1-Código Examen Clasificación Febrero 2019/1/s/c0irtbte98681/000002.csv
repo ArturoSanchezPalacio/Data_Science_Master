@@ -1,0 +1,4 @@
+"0","fit = glmnet(X_train, y_train, family = ""multinomial"", type.multinomial = ""grouped"")"
+"0","cvfit=cv.glmnet(X_train, y_train, family=""multinomial"", type.multinomial = ""grouped"", parallel = TRUE)"
+"2","executing %dopar% sequentially: no parallel backend registered"
+"0","prediction_cat3 <- predict(cvfit, newx = X_test, s = ""lambda.min"", type = ""class"")"

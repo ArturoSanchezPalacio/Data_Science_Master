@@ -1,0 +1,5 @@
+"0","library(glmnet)"
+"0","X_train <- model.matrix(cat3 ~., data.train)[,-11]"
+"0","y_train <- data.train$cat3"
+"0","X_test <- model.matrix(cat3 ~., data.test)[,-11]"
+"0","y_test <- data.test$cat3"

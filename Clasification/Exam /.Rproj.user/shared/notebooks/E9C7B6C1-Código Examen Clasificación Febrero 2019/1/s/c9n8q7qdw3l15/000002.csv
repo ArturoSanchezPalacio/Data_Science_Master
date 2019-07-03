@@ -1,0 +1,21 @@
+"0","library(glmnet)"
+"2","Loading required package: Matrix
+"
+"2","Loading required package: foreach
+"
+"2","Loaded glmnet 2.0-16
+
+"
+"2","
+Attaching package: ‘glmnet’
+
+"
+"2","The following object is masked from ‘package:pROC’:
+
+    auc
+
+"
+"0","X_train <- model.matrix(cat3 ~., data.train2)[,-11]"
+"0","y_train <- data.train2$cat3"
+"0","X_test <- model.matrix(cat3 ~., data.test2)[,-11]"
+"0","y_test <- data.test2$cat3"

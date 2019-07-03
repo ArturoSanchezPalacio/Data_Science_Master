@@ -1,0 +1,2 @@
+"0","library(openxlsx)"
+"0","data <- read.xlsx(""./data/BDexamen2.xlsx"")"

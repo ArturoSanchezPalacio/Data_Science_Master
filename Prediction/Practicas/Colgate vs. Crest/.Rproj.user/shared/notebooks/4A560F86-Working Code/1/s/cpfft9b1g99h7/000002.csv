@@ -1,0 +1,3 @@
+"0","autoplot(diff(colgate_training,52)) +"
+"0","    xlab(""Year"") + ylab("""") +"
+"0","    ggtitle(""Antidiabetic drug sales"")"

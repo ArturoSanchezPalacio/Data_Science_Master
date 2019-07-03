@@ -1,0 +1,5 @@
+"0","print(paste('Accuracy',sum(diag(logit.perf))/sum(logit.perf)))"
+"1","[1]"
+"1"," ""Accuracy 0.901263823064771"""
+"1","
+"

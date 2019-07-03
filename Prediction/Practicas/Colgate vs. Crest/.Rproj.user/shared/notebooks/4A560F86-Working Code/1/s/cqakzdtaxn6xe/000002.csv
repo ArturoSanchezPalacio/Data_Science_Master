@@ -1,0 +1,6 @@
+"0","set.seed(12345)"
+"0","colgate_training <-  window(colgate, start = 1958,end = c(1962, 52))"
+"0","crest_training <- window(crest, start = 1958, c(1962, 52))"
+"0","colgate_test <- window(colgate, start = 1963)"
+"0","crest_test <- window(crest, start = 1963)"
+"0","training_data <- data[1:260,]"

@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1557104047346.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "243527494",
+    "id" : "22CCE4FA",
+    "lastKnownWriteTime" : 1557104298,
+    "last_content_update" : 1557104298586,
+    "path" : "~/Documents/CUNEF/Riesgo operacional/Practica Final/probando.R",
+    "project_path" : "probando.R",
+    "properties" : {
+        "cursorPosition" : "52,0",
+        "scrollLine" : "0",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

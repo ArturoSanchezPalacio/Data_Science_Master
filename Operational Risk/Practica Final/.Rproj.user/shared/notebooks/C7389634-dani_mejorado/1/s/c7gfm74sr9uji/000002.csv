@@ -1,0 +1,1 @@
+"0","datos_agregados <- danishuni %>% group_by(semanas = floor_date(danishuni$Date, ""week"")) %>% summarize(siniestros = n(), Loss = sum(Loss))"

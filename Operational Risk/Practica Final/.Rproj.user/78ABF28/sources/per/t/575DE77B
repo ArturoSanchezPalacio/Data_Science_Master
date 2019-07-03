@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1559739014388.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "575DE77B",
+    "lastKnownWriteTime" : 4294967295,
+    "last_content_update" : 1559739014388,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "BB909387",
+        "caption" : "df_perdidas",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=df_perdidas&cache_key=BB909387",
+        "displayedObservations" : 132,
+        "environment" : "",
+        "object" : "df_perdidas",
+        "preview" : 0,
+        "totalObservations" : 132,
+        "variables" : 3
+    },
+    "relative_order" : 8,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}
